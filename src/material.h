@@ -27,7 +27,7 @@ public:
 		//auto scatter_direction = random_in_hemisphere(rec.normal);
 		if (scatter_direction.near_zero()) scatter_direction = rec.normal; // Correct degenerate directions
 		scatter s{};
-		s.bounce = ray(rec.point, scatter_direction);
+		s.bounce = ray(rec.point, scatter_direction, r.time());
 		s.attenuation = this->a; // Could instead scatter with probabiliy p and have the atenuation be albedo/p
 		return s;
 	};
@@ -43,7 +43,7 @@ public:
 	std::optional<scatter> scatter_check(const ray& r, const hit& rec) const override {
 		vec3 reflected = reflect(unit_vector(r.direction()), rec.normal);
 		scatter s{};
-		s.bounce = ray(rec.point, reflected + f * random_in_unit_sphere());
+		s.bounce = ray(rec.point, reflected + f * random_in_unit_sphere(), r.time());
 		s.attenuation = this->a;
 		if (dot(s.bounce.direction(), rec.normal) > 0) return s;
 		return std::nullopt;
@@ -74,7 +74,7 @@ public:
 		}
 
 		scatter s{};
-		s.bounce = ray(rec.point, direction);
+		s.bounce = ray(rec.point, direction, r.time());
 		s.attenuation = color(1.0, 1.0, 1.0);
 		return s;
 	};

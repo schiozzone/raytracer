@@ -3,6 +3,7 @@
 #include <optional>
 
 #include "ray.h"
+#include "aabb.h"
 
 class material;
 
@@ -22,4 +23,5 @@ struct hit {
 class visible {
 public:
 	virtual std::optional<hit> hit_check(const ray& r, double t_min, double t_max) const = 0;
+	virtual std::optional<aabb> bounding_box(double time0, double time1) const = 0;
 };

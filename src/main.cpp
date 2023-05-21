@@ -8,6 +8,8 @@
 #include "camera.h"
 #include "random_number.h"
 #include "material.h"
+#include "moving_sphere.h"
+#include "bvh.h"
 
 visible_collection random_scene() {
 	visible_collection world;
@@ -27,7 +29,8 @@ visible_collection random_scene() {
 					// diffuse
 					auto albedo = color::random() * color::random();
 					sphere_material = std::make_shared<lambertian>(albedo);
-					world.add(std::make_shared<sphere>(center, 0.2, sphere_material));
+					auto center2 = center + vec3(0, random_double(0, .5), 0);
+					world.add(std::make_shared<moving_sphere>(center, center2, 0.0, 1.0, 0.2, sphere_material));
 				}
 				else if (choose_mat < 0.95) {
 					// metal
@@ -81,14 +84,16 @@ int main(int argc, char* argv) {
 	assert((int)(256 * clamp(1, 0.0, almost_one)) == 255);
 
 	// Render target
-	constexpr double aspect_ratio = 3.0 / 2.0;// 16.0 / 9.0;
-	constexpr int img_width = 1200;
+	constexpr double aspect_ratio = 16.0 / 9.0;
+	constexpr int img_width = 400;
 	const image img{ .width = img_width, .height = static_cast<int>(img_width / aspect_ratio) };
-	constexpr int samples_per_pixel = 500;
+	constexpr int samples_per_pixel = 100;
 	constexpr int max_depth = 50;
 
 	// Scene
-	visible_collection world = random_scene();
+	//visible_collection world = random_scene();
+	visible_collection scene = random_scene();
+	bvh_node world(scene, 0.0, 1.1);
 	/*std::shared_ptr<material> mat_ground = std::make_shared<lambertian>(color(0.8, 0.8, 0.0));
 	std::shared_ptr<material> mat_center = std::make_shared<lambertian>(color(0.1, 0.2, 0.5));
 	std::shared_ptr<material> mat_left   = std::make_shared<dielectric>(1.5);
@@ -105,7 +110,7 @@ int main(int argc, char* argv) {
 	vec3 vup(0, 1, 0);
 	auto dist_to_focus = 10.0;
 	auto aperture = 0.1;
-	camera cam(lookfrom, lookat, vup, 20, aspect_ratio, aperture, dist_to_focus);
+	camera cam(lookfrom, lookat, vup, 20, aspect_ratio, aperture, dist_to_focus, 0.0, 1.0);
 
 	std::cout << "P3\n" << img.width << ' ' << img.height << "\n255\n";
 	for (int j = img.height - 1; j >= 0; --j) {

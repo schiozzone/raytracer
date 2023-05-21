@@ -9,6 +9,7 @@ public:
 		: c(center), r(radius), m(material) {};
 
 	std::optional<hit> hit_check(const ray& r, double t_min, double t_max) const override;
+	std::optional<aabb> bounding_box(double time0, double time1) const override;
 
 private:
 	vec3 c;
@@ -41,4 +42,11 @@ std::optional<hit> sphere::hit_check(const ray& r, double t_min, double t_max) c
 	rec.mat_ptr = this->m;
 
 	return rec;
+}
+
+std::optional<aabb> sphere::bounding_box(double time0, double time1) const {
+	return aabb(
+		this->c - vec3(this->r, this->r, this->r),
+		this->c + vec3(this->r, this->r, this->r)
+	);
 }
