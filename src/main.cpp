@@ -14,8 +14,8 @@
 visible_collection random_scene() {
 	visible_collection world;
 
-	auto ground_material = std::make_shared<lambertian>(color(0.5, 0.5, 0.5));
-	world.add(std::make_shared<sphere>(vec3(0, -1000, 0), 1000, ground_material));
+	auto checker = std::make_shared<checker_texture>(color(0.2, 0.3, 0.1), color(0.9, 0.9, 0.9));
+	world.add(std::make_shared<sphere>(vec3(0, -1000, 0), 1000, std::make_shared<lambertian>(checker)));
 
 	for (int a = -11; a < 11; a++) {
 		for (int b = -11; b < 11; b++) {
@@ -60,6 +60,25 @@ visible_collection random_scene() {
 	return world;
 }
 
+visible_collection two_spheres() {
+	visible_collection objects;
+	auto checker = std::make_shared<lambertian>(
+		std::make_shared<checker_texture>(
+			color(0.2, 0.3, 0.1),
+			color(0.9, 0.9, 0.9)
+	));
+	objects.add(std::make_shared<sphere>(vec3{ 0, -10, 0 }, 10, checker));
+	objects.add(std::make_shared<sphere>(vec3{ 0, 10, 0 }, 10, checker));
+	return objects;
+}
+
+visible_collection two_perlin_spheres() {
+	visible_collection objects;
+	auto pertext = std::make_shared<lambertian>(std::make_shared<noise_texture>(4));
+	objects.add(std::make_shared<sphere>(vec3{ 0, -1000, 0 }, 1000, pertext));
+	objects.add(std::make_shared<sphere>(vec3{ 0, 2, 0 }, 2, pertext));
+	return objects;
+}
 
 color ray_color(const ray& r, const visible& world, int depth) {
 	if (depth <= 0) return color(0, 0, 0);
@@ -90,27 +109,42 @@ int main(int argc, char* argv) {
 	constexpr int samples_per_pixel = 100;
 	constexpr int max_depth = 50;
 
+	// Camera
+	vec3 lookfrom;
+	vec3 lookat;
+	auto vfov = 40.0;
+	auto aperture = 0.0;
+
 	// Scene
-	//visible_collection world = random_scene();
-	visible_collection scene = random_scene();
-	bvh_node world(scene, 0.0, 1.1);
-	/*std::shared_ptr<material> mat_ground = std::make_shared<lambertian>(color(0.8, 0.8, 0.0));
-	std::shared_ptr<material> mat_center = std::make_shared<lambertian>(color(0.1, 0.2, 0.5));
-	std::shared_ptr<material> mat_left   = std::make_shared<dielectric>(1.5);
-	std::shared_ptr<material> mat_right  = std::make_shared<metal>(color(0.8, 0.6, 0.2), 1.0);
-	world.add(std::make_shared<sphere>(vec3{  0.0, -100.5, -1.0 }, 100, mat_ground));
-	world.add(std::make_shared<sphere>(vec3{  0.0,    0.0, -1.0 }, 0.5, mat_center));
-	world.add(std::make_shared<sphere>(vec3{ -1.0,    0.0, -1.0 }, 0.5, mat_left));
-	world.add(std::make_shared<sphere>(vec3{ -1.0,    0.0, -1.0 }, -0.45, mat_left));
-	world.add(std::make_shared<sphere>(vec3{  1.0,    0.0, -1.0 }, 0.5, mat_right));*/
+	visible_collection scene;
+	switch (0) {
+	case 1:
+		scene = random_scene();
+		lookfrom = vec3(13, 2, 3);
+		lookat = vec3(0, 0, 0);
+		vfov = 20.0;
+		aperture = 0.1;
+		break;
+	case 2:
+		scene = two_spheres();
+		lookfrom = vec3(13, 2, 3);
+		lookat = vec3(0, 0, 0);
+		vfov = 20.0;
+		break;
+	default:
+	case 3:
+		scene = two_perlin_spheres();
+		lookfrom = vec3(13, 2, 3);
+		lookat = vec3(0, 0, 0);
+		vfov = 20.0;
+		break;
+	}
+	bvh_node world(scene, 0.0, 1.0);
 
 	// Camera
-	vec3 lookfrom(13, 2, 3);
-	vec3 lookat(0, 0, 0);
 	vec3 vup(0, 1, 0);
 	auto dist_to_focus = 10.0;
-	auto aperture = 0.1;
-	camera cam(lookfrom, lookat, vup, 20, aspect_ratio, aperture, dist_to_focus, 0.0, 1.0);
+	camera cam(lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus, 0.0, 1.0);
 
 	std::cout << "P3\n" << img.width << ' ' << img.height << "\n255\n";
 	for (int j = img.height - 1; j >= 0; --j) {

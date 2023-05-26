@@ -4,6 +4,7 @@
 
 #include "common.h"
 #include "visible.h"
+#include "texture.h"
 
 struct hit;
 
@@ -19,7 +20,8 @@ public:
 
 class lambertian : public material {
 public:
-	lambertian(const color& albedo) : a(albedo) {}
+	lambertian(const color& albedo) : a(std::make_shared<solid_color>(albedo)) {}
+	lambertian(std::shared_ptr<texture> albedo) : a(albedo) {}
 
 	std::optional<scatter> scatter_check(const ray& r, const hit& rec) const override {
 		//auto scatter_direction = rec.normal + random_in_unit_sphere();
@@ -28,28 +30,29 @@ public:
 		if (scatter_direction.near_zero()) scatter_direction = rec.normal; // Correct degenerate directions
 		scatter s{};
 		s.bounce = ray(rec.point, scatter_direction, r.time());
-		s.attenuation = this->a; // Could instead scatter with probabiliy p and have the atenuation be albedo/p
+		s.attenuation = this->a->value(rec.u, rec.v, rec.point); // Could instead scatter with probabiliy p and have the atenuation be albedo/p
 		return s;
 	};
 
 private:
-	color a;
+	std::shared_ptr<texture> a;
 };
 
 class metal : public material {
 public:
-	metal(const color& albedo, double fuzz) : a(albedo), f(fuzz < 1 ? fuzz : 1) {}
+	metal(const color& albedo, double fuzz) : metal(std::make_shared<solid_color>(albedo), f) {}
+	metal(std::shared_ptr<texture> albedo, double fuzz) : a(albedo), f(fuzz < 1 ? fuzz : 1) {}
 
 	std::optional<scatter> scatter_check(const ray& r, const hit& rec) const override {
 		vec3 reflected = reflect(unit_vector(r.direction()), rec.normal);
 		scatter s{};
 		s.bounce = ray(rec.point, reflected + f * random_in_unit_sphere(), r.time());
-		s.attenuation = this->a;
+		s.attenuation = this->a->value(rec.u, rec.v, rec.point);
 		if (dot(s.bounce.direction(), rec.normal) > 0) return s;
 		return std::nullopt;
 	};
 private:
-	color a;
+	std::shared_ptr<texture> a;
 	double f;
 };
 

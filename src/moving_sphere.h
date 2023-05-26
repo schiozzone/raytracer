@@ -46,6 +46,7 @@ std::optional<hit> moving_sphere::hit_check(const ray& r, double t_min, double t
 	rec.point = r.at(rec.t);
 	vec3 outward_normal = (rec.point - center(r.time())) / this->r; // Changed from sphere code
 	rec.set_face_normal(r, outward_normal);
+	std::tie(rec.u, rec.v) = sphere::get_sphere_uv(outward_normal);
 	rec.mat_ptr = this->m;
 
 	return rec;

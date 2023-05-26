@@ -11,6 +11,16 @@ public:
 	std::optional<hit> hit_check(const ray& r, double t_min, double t_max) const override;
 	std::optional<aabb> bounding_box(double time0, double time1) const override;
 
+	static std::pair<double, double> get_sphere_uv(const vec3& p) {
+		assert(std::fabs(p.length_squared() - 1.0) < std::numeric_limits<T>::min());
+		auto theta = acos(-p.y());
+		auto phi = atan2(-p.z(), p.x()) + pi;
+		return {
+			phi / (2 * pi),
+			theta / pi
+		};
+	}
+
 private:
 	vec3 c;
 	double r;
@@ -39,6 +49,7 @@ std::optional<hit> sphere::hit_check(const ray& r, double t_min, double t_max) c
 	rec.point = r.at(rec.t);
 	vec3 outward_normal = (rec.point - this->c) / this->r;
 	rec.set_face_normal(r, outward_normal);
+	std::tie(rec.u, rec.v) = get_sphere_uv(outward_normal);
 	rec.mat_ptr = this->m;
 
 	return rec;
