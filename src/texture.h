@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include "perlin.h"
+#include "stb_image.h"
 
 class texture {
 public:
@@ -56,4 +57,51 @@ public:
 private:
 	perlin noise;
 	double sc;
+};
+
+class image_texture : public texture {
+public:
+	image_texture() : data(), width(0), height(0), bytes_per_pixel(0) {}
+	image_texture(const std::string& filename) {
+		unsigned char* raw_data = stbi_load(filename.c_str(), &width, &height, &bytes_per_pixel, 0);
+		if (raw_data == NULL) {
+			std::cerr << "ERROR: Could not load texture image file " << filename << ".\n";
+			width = height = bytes_per_pixel = 0;
+		}
+		else {
+			const size_t size = width * height * bytes_per_pixel;
+			data.resize(size);
+			memcpy_s(data.data(), data.size(), raw_data, size);
+			stbi_image_free(raw_data);
+		}
+	}
+
+	color value(double u, double v, const vec3& p) const override {
+		if (data.empty()) return color(1, 0, 1);
+
+		// Clamp UVs, could use wrapping instead
+		u = clamp(u, 0.0, 1.0);
+		v = 1.0 - clamp(v, 0.0, 1.0); // Image coordinates go top to bottom
+
+		auto i = static_cast<int>(u * width);
+		auto j = static_cast<int>(v * height);
+		// Should be at most equal, never greater
+		if (i >= width) i = width - 1;
+		if (j >= height) j = height - 1;
+
+		const auto color_scale = 1.0 / 255.0;
+		const auto bytes_per_scanline = width * bytes_per_pixel;
+		size_t pixel = j * bytes_per_scanline + i * bytes_per_pixel;
+		assert(bytes_per_pixel >= 3); // Less will break
+		return color(
+			color_scale * data[pixel],
+			color_scale * data[pixel + 1],
+			color_scale * data[pixel + 2]
+		);
+	}
+
+private:
+	std::vector<unsigned char> data;
+	int width, height;
+	int bytes_per_pixel;
 };

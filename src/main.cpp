@@ -80,6 +80,13 @@ visible_collection two_perlin_spheres() {
 	return objects;
 }
 
+visible_collection earth() {
+	auto earth_texture = std::make_shared<image_texture>("Blue_Marble_2002.png");
+	auto earth_surface = std::make_shared<lambertian>(earth_texture);
+	auto globe = std::make_shared<sphere>(vec3(0, 0, 0), 2, earth_surface);
+	return visible_collection(globe);
+}
+
 color ray_color(const ray& r, const visible& world, int depth) {
 	if (depth <= 0) return color(0, 0, 0);
 
@@ -131,9 +138,15 @@ int main(int argc, char* argv) {
 		lookat = vec3(0, 0, 0);
 		vfov = 20.0;
 		break;
-	default:
 	case 3:
 		scene = two_perlin_spheres();
+		lookfrom = vec3(13, 2, 3);
+		lookat = vec3(0, 0, 0);
+		vfov = 20.0;
+		break;
+	default:
+	case 4:
+		scene = earth();
 		lookfrom = vec3(13, 2, 3);
 		lookat = vec3(0, 0, 0);
 		vfov = 20.0;
