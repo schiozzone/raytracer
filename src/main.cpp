@@ -10,6 +10,7 @@
 #include "material.h"
 #include "moving_sphere.h"
 #include "bvh.h"
+#include "aarect.h"
 
 visible_collection random_scene() {
 	visible_collection world;
@@ -87,14 +88,46 @@ visible_collection earth() {
 	return visible_collection(globe);
 }
 
+visible_collection simple_light() {
+	visible_collection objects;
+	auto pertext = std::make_shared<lambertian>(std::make_shared<noise_texture>(4));
+	objects.add(std::make_shared<sphere>(vec3{ 0, -1000, 0 }, 1000, pertext));
+	objects.add(std::make_shared<sphere>(vec3{ 0, 2, 0 }, 2, pertext));
+	auto difflight = std::make_shared<diffuse_light>(color(4, 4, 4));
+	objects.add(std::make_shared<xy_rect>(3, 5, 1, 3, -2, difflight));
+	auto nolight = std::make_shared<diffuse_light>(color(0, 0, 0));
+	objects.add(std::make_shared<sphere>(vec3{ 0, 0, 0 }, -10000, nolight));
+	return objects;
+}
+
+visible_collection cornell_box() {
+	visible_collection objects;
+	auto red = std::make_shared<lambertian>(color(.65, .05, .05));
+	auto white = std::make_shared<lambertian>(color(.73, .73, .73));
+	auto green = std::make_shared<lambertian>(color(.12, .45, .15));
+	auto light = std::make_shared<diffuse_light>(color(15, 15, 15));
+	auto background = std::make_shared<diffuse_light>(color(0, 0, 0));
+	objects.add(std::make_shared<yz_rect>(0, 555, 0, 555, 555, green));
+	objects.add(std::make_shared<yz_rect>(0, 555, 0, 555, 0, red));
+
+	objects.add(std::make_shared<xz_rect>(213, 343, 227, 332, 554, light));
+	objects.add(std::make_shared<xz_rect>(0, 555, 0, 555, 0, white));
+	objects.add(std::make_shared<xz_rect>(0, 555, 0, 555, 555, white));
+
+	objects.add(std::make_shared<xy_rect>(0, 555, 0, 555, 555, white));
+	objects.add(std::make_shared<sphere>(vec3{ 277, 277, 277 }, -2216, background));
+	return objects;
+}
+
 color ray_color(const ray& r, const visible& world, int depth) {
 	if (depth <= 0) return color(0, 0, 0);
 
 	auto rec = world.hit_check(r, 0.001, infinity);
 	if (rec) {
 		auto scatter = rec->mat_ptr->scatter_check(r, rec.value());
-		if (scatter) return scatter->attenuation * ray_color(scatter->bounce, world, depth - 1);
-		return color(0, 0, 0);
+		color emitted = rec->mat_ptr->emitted(rec->u, rec->v, rec->point);
+		if (scatter) emitted += scatter->attenuation * ray_color(scatter->bounce, world, depth - 1);
+		return emitted;
 	}
 
 	vec3 unit_direction = unit_vector(r.direction());
@@ -110,10 +143,10 @@ int main(int argc, char* argv) {
 	assert((int)(256 * clamp(1, 0.0, almost_one)) == 255);
 
 	// Render target
-	constexpr double aspect_ratio = 16.0 / 9.0;
-	constexpr int img_width = 400;
+	constexpr double aspect_ratio = 1.0;// 16.0 / 9.0;
+	constexpr int img_width = 600;
 	const image img{ .width = img_width, .height = static_cast<int>(img_width / aspect_ratio) };
-	constexpr int samples_per_pixel = 100;
+	constexpr int samples_per_pixel = 200;
 	constexpr int max_depth = 50;
 
 	// Camera
@@ -144,12 +177,24 @@ int main(int argc, char* argv) {
 		lookat = vec3(0, 0, 0);
 		vfov = 20.0;
 		break;
-	default:
 	case 4:
 		scene = earth();
 		lookfrom = vec3(13, 2, 3);
 		lookat = vec3(0, 0, 0);
 		vfov = 20.0;
+		break;
+	case 5:
+		scene = simple_light();
+		lookfrom = vec3(26, 3, 6);
+		lookat = vec3(0, 2, 0);
+		vfov = 20.0;
+		break;
+	default:
+	case 6:
+		scene = cornell_box();
+		lookfrom = vec3(278, 278, -800);
+		lookat = vec3(278, 278, 0);
+		vfov = 40.0;
 		break;
 	}
 	bvh_node world(scene, 0.0, 1.0);

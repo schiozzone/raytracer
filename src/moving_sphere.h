@@ -53,14 +53,15 @@ std::optional<hit> moving_sphere::hit_check(const ray& r, double t_min, double t
 }
 
 std::optional<aabb> moving_sphere::bounding_box(double time0, double time1) const {
+	auto radius = fabs(this->r);
 	return surrounding_box(
 		aabb(
-			this->c0 - vec3(this->r, this->r, this->r),
-			this->c0 + vec3(this->r, this->r, this->r)
+			this->c0 - vec3(radius, radius, radius),
+			this->c0 + vec3(radius, radius, radius)
 		),
 		aabb(
-			this->c1 - vec3(this->r, this->r, this->r),
-			this->c1 + vec3(this->r, this->r, this->r)
+			this->c1 - vec3(radius, radius, radius),
+			this->c1 + vec3(radius, radius, radius)
 		)
 	);
 }

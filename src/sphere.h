@@ -56,8 +56,9 @@ std::optional<hit> sphere::hit_check(const ray& r, double t_min, double t_max) c
 }
 
 std::optional<aabb> sphere::bounding_box(double time0, double time1) const {
+	auto radius = fabs(this->r);
 	return aabb(
-		this->c - vec3(this->r, this->r, this->r),
-		this->c + vec3(this->r, this->r, this->r)
+		this->c - vec3(radius, radius, radius),
+		this->c + vec3(radius, radius, radius)
 	);
 }
