@@ -11,6 +11,7 @@
 #include "moving_sphere.h"
 #include "bvh.h"
 #include "aarect.h"
+#include "box.h"
 
 visible_collection random_scene() {
 	visible_collection world;
@@ -116,6 +117,16 @@ visible_collection cornell_box() {
 
 	objects.add(std::make_shared<xy_rect>(0, 555, 0, 555, 555, white));
 	objects.add(std::make_shared<sphere>(vec3{ 277, 277, 277 }, -2216, background));
+
+	std::shared_ptr<visible> box1 = std::make_shared<box>(vec3{ 0, 0, 0 }, vec3{ 165, 330, 165 }, white);
+	box1 = std::make_shared<rotate_y>(box1, 15);
+	box1 = std::make_shared<translate>(box1, vec3{ 265, 0, 295 });
+	std::shared_ptr<visible> box2 = std::make_shared<box>(vec3{ 0, 0, 0 }, vec3{ 165, 165, 165 }, white);
+	box2 = std::make_shared<rotate_y>(box2, -18);
+	box2 = std::make_shared<translate>(box2, vec3{ 130, 0, 65 });
+
+	objects.add(box1);
+	objects.add(box2);
 	return objects;
 }
 
@@ -144,9 +155,9 @@ int main(int argc, char* argv) {
 
 	// Render target
 	constexpr double aspect_ratio = 1.0;// 16.0 / 9.0;
-	constexpr int img_width = 600;
+	constexpr int img_width = 400;// 600;
 	const image img{ .width = img_width, .height = static_cast<int>(img_width / aspect_ratio) };
-	constexpr int samples_per_pixel = 200;
+	constexpr int samples_per_pixel = 150;// 200;
 	constexpr int max_depth = 50;
 
 	// Camera
