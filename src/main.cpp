@@ -12,6 +12,7 @@
 #include "bvh.h"
 #include "aarect.h"
 #include "box.h"
+#include "constant_medium.h"
 
 visible_collection random_scene() {
 	visible_collection world;
@@ -130,6 +131,95 @@ visible_collection cornell_box() {
 	return objects;
 }
 
+visible_collection cornell_smoke() {
+	visible_collection objects;
+	auto red = std::make_shared<lambertian>(color(.65, .05, .05));
+	auto white = std::make_shared<lambertian>(color(.73, .73, .73));
+	auto green = std::make_shared<lambertian>(color(.12, .45, .15));
+	auto light = std::make_shared<diffuse_light>(color(7, 7, 7));
+	auto background = std::make_shared<diffuse_light>(color(0, 0, 0));
+	objects.add(std::make_shared<yz_rect>(0, 555, 0, 555, 555, green));
+	objects.add(std::make_shared<yz_rect>(0, 555, 0, 555, 0, red));
+
+	objects.add(std::make_shared<xz_rect>(113, 443, 127, 432, 554, light));
+	objects.add(std::make_shared<xz_rect>(0, 555, 0, 555, 0, white));
+	objects.add(std::make_shared<xz_rect>(0, 555, 0, 555, 555, white));
+
+	objects.add(std::make_shared<xy_rect>(0, 555, 0, 555, 555, white));
+	objects.add(std::make_shared<sphere>(vec3{ 277, 277, 277 }, -2216, background));
+
+	std::shared_ptr<visible> box1 = std::make_shared<box>(vec3{ 0, 0, 0 }, vec3{ 165, 330, 165 }, white);
+	box1 = std::make_shared<rotate_y>(box1, 15);
+	box1 = std::make_shared<translate>(box1, vec3{ 265, 0, 295 });
+	std::shared_ptr<visible> box2 = std::make_shared<box>(vec3{ 0, 0, 0 }, vec3{ 165, 165, 165 }, white);
+	box2 = std::make_shared<rotate_y>(box2, -18);
+	box2 = std::make_shared<translate>(box2, vec3{ 130, 0, 65 });
+
+	objects.add(std::make_shared<constant_medium>(box1, 0.01, color{ 0, 0, 0 }));
+	objects.add(std::make_shared<constant_medium>(box2, 0.01, color{ 1, 1, 1 }));
+	return objects;
+}
+
+visible_collection final_scene() {
+	visible_collection boxes1;
+	auto ground = std::make_shared<lambertian>(color{ 0.48, 0.83, 0.53 });
+
+	const int boxes_per_side = 20;
+	for (int i = 0; i < boxes_per_side; ++i)
+		for (int j = 0; j < boxes_per_side; ++j) {
+			auto w = 100.0;
+			auto x0 = -1000.0 + i * w;
+			auto z0 = -1000.0 + j * w;
+			auto y0 = 0.0;
+			auto x1 = x0 + w;
+			auto z1 = z0 + w;
+			auto y1 = random_double(1, 101);
+			boxes1.add(std::make_shared<box>(vec3{ x0, y0, z0 }, vec3{ x1, y1, z1 }, ground));
+		}
+
+	visible_collection objects;
+	objects.add(std::make_shared<bvh_node>(boxes1, 0, 1));
+
+	auto light = std::make_shared<diffuse_light>(color{ 7, 7, 7 });
+	objects.add(std::make_shared<xz_rect>(123, 423, 147, 412, 554, light));
+
+	auto center1 = vec3(400, 400, 200);
+	auto center2 = center1 + vec3(30, 0, 0);
+	auto moving_sphere_material = std::make_shared<lambertian>(color{ 0.7, 0.3, 0.1 });
+	objects.add(std::make_shared<moving_sphere>(center1, center2, 0, 1, 50, moving_sphere_material));
+
+	objects.add(std::make_shared<sphere>(vec3{ 260, 150, 45 }, 50, std::make_shared<dielectric>(1.5)));
+	objects.add(std::make_shared<sphere>(vec3{ 0, 150, 145 }, 50, std::make_shared<metal>(color{ 0.8, 0.8, 0.9 }, 1.0)));
+
+	auto boundary = std::make_shared<sphere>(vec3{ 360, 150, 145 }, 70, std::make_shared<dielectric>(1.5));
+	objects.add(boundary);
+	objects.add(std::make_shared<constant_medium>(boundary, 0.2, color{ 0.2, 0.4, 0.9 }));
+
+	objects.add(std::make_shared<constant_medium>(
+		std::make_shared<sphere>(vec3{ 0, 0, 0 }, 5000, nullptr), 0.0001, color{ 1, 1, 1 }));
+
+	auto emat = std::make_shared<lambertian>(std::make_shared<image_texture>("Blue_Marble_2002.png"));
+	objects.add(std::make_shared<sphere>(vec3{ 400, 200, 400 }, 100, emat));
+	
+	auto permat = std::make_shared<lambertian>(std::make_shared<noise_texture>(0.1));
+	objects.add(std::make_shared<sphere>(vec3{ 220, 280, 300 }, 80, permat));
+
+	visible_collection boxes2;
+	auto white = std::make_shared<lambertian>(color{ .73, .73, .73 });
+	int ns = 1000;
+	for (int j = 0; j < ns; j++)
+		boxes2.add(std::make_shared<sphere>(vec3::random(0, 165), 10, white));
+	objects.add(std::make_shared<translate>(
+		std::make_shared<rotate_y>(
+			std::make_shared<bvh_node>(boxes2, 0.0, 1.0),
+			15
+		),
+		vec3{ -100, 270, 395 }
+	));
+
+	return objects;
+}
+
 color ray_color(const ray& r, const visible& world, int depth) {
 	if (depth <= 0) return color(0, 0, 0);
 
@@ -141,9 +231,10 @@ color ray_color(const ray& r, const visible& world, int depth) {
 		return emitted;
 	}
 
-	vec3 unit_direction = unit_vector(r.direction());
+	/*vec3 unit_direction = unit_vector(r.direction());
 	auto t = 0.5 * (unit_direction.y() + 1.0);
-	return (1.0 - t) * color(1.0, 1.0, 1.0) + t * color(0.5, 0.7, 1.0);
+	return (1.0 - t) * color(1.0, 1.0, 1.0) + t * color(0.5, 0.7, 1.0);*/
+	return color(0, 0, 0);
 }
 
 struct image {
@@ -155,9 +246,9 @@ int main(int argc, char* argv) {
 
 	// Render target
 	constexpr double aspect_ratio = 1.0;// 16.0 / 9.0;
-	constexpr int img_width = 400;// 600;
+	constexpr int img_width = 800;
 	const image img{ .width = img_width, .height = static_cast<int>(img_width / aspect_ratio) };
-	constexpr int samples_per_pixel = 150;// 200;
+	constexpr int samples_per_pixel = 10'000;
 	constexpr int max_depth = 50;
 
 	// Camera
@@ -200,10 +291,22 @@ int main(int argc, char* argv) {
 		lookat = vec3(0, 2, 0);
 		vfov = 20.0;
 		break;
-	default:
 	case 6:
 		scene = cornell_box();
 		lookfrom = vec3(278, 278, -800);
+		lookat = vec3(278, 278, 0);
+		vfov = 40.0;
+		break;
+	case 7:
+		scene = cornell_smoke();
+		lookfrom = vec3(278, 278, -800);
+		lookat = vec3(278, 278, 0);
+		vfov = 40.0;
+		break;
+	default:
+	case 8:
+		scene = final_scene();
+		lookfrom = vec3(478, 278, -600);
 		lookat = vec3(278, 278, 0);
 		vfov = 40.0;
 		break;
