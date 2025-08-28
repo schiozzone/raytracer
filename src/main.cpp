@@ -241,6 +241,36 @@ struct image {
 	uint64_t width, height;
 };
 
+// [Hacky multithreading support]
+#include <thread>
+#include <atomic>
+#include <sstream>
+std::atomic_int scanlines{ 0 };
+void t_func(
+	int start, int end, color* data,
+	int height, int width, int samples_per_pixel,
+	const camera& cam, const bvh_node& world, int max_depth
+) {
+	for (int j = start; j < end; ++j) {
+		for (int i = 0; i < width; ++i) {
+			int k = height - 1 - j; // Top to bottom
+			color pixel(0, 0, 0);
+			for (int s = 0; s < samples_per_pixel; ++s) {
+				auto u = (i + random_double()) / (width - 1);
+				auto v = (k + random_double()) / (height - 1);
+				ray r = cam.get_ray(u, v);
+				pixel += ray_color(r, world, max_depth);
+			}
+			data[j * width + i] = pixel;
+		}
+		int print_val = ++scanlines;
+		std::stringstream msg;
+		msg << "\rScanlines remaining: " << (height - print_val) << ' ';
+		std::cerr << msg.str();
+	}
+}
+// [/Hacky multithreading support]
+
 int main(int argc, char* argv) {
 	assert((int)(256 * clamp(1, 0.0, almost_one)) == 255);
 
@@ -248,7 +278,7 @@ int main(int argc, char* argv) {
 	constexpr double aspect_ratio = 1.0;// 16.0 / 9.0;
 	constexpr int img_width = 800;
 	const image img{ .width = img_width, .height = static_cast<int>(img_width / aspect_ratio) };
-	constexpr int samples_per_pixel = 10'000;
+	constexpr int samples_per_pixel = 100;// 10'000;
 	constexpr int max_depth = 50;
 
 	// Camera
@@ -318,6 +348,8 @@ int main(int argc, char* argv) {
 	auto dist_to_focus = 10.0;
 	camera cam(lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus, 0.0, 1.0);
 
+	// [Hacky multithreading support]
+#if 0
 	std::cout << "P3\n" << img.width << ' ' << img.height << "\n255\n";
 	for (int j = img.height - 1; j >= 0; --j) {
 		std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
@@ -333,5 +365,36 @@ int main(int argc, char* argv) {
 		}
 	}
 	std::cerr << "\nDone.\n";
+#else
+	std::vector<color> framebuffer;
+	framebuffer.resize(img.width * img.height);
+	std::vector<std::thread> threads;
+	int cores = std::thread::hardware_concurrency();
+	std::cerr << "Found " << cores << " cores.\n" << std::flush;
+	const int num_threads = cores * 2;
+	int lines_per_thread = img.height / num_threads;
+
+	for (int i = 0; i < num_threads - 1; ++i)
+		threads.emplace_back(t_func,
+			i * lines_per_thread, (i+1) * lines_per_thread, framebuffer.data(),
+			img.height, img.width, samples_per_pixel,
+			cam, world, max_depth
+			);
+	threads.emplace_back(t_func,
+		(num_threads - 1) * lines_per_thread, img.height, framebuffer.data(),
+		img.height, img.width, samples_per_pixel,
+		cam, world, max_depth
+	);
+
+	for (std::thread& t : threads)
+		t.join();
+
+	std::cout << "P3\n" << img.width << ' ' << img.height << "\n255\n";
+	std::cerr << "\nWriting image...\n";
+	for(const auto& pixel : framebuffer)
+		write_color(std::cout, pixel, samples_per_pixel);
+	std::cerr << "\nDone.\n";
+#endif
+	// [/Hacky multithreading support]
 	return 0;
 }
