@@ -2,8 +2,8 @@
 
 #include <optional>
 
-#include "math/ray.h"
-#include "aabb.h"
+#include "math/ray.hpp"
+#include "aabb.hpp"
 
 class material;
 

@@ -2,8 +2,8 @@
 
 #include <cstring>
 
-#include "math/common.h"
-#include "materials/perlin.h"
+#include "math/common.hpp"
+#include "materials/perlin.hpp"
 #include "materials/stb_image.h"
 
 class texture {

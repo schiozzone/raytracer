@@ -1,6 +1,6 @@
 #pragma once
 
-#include "math/common.h"
+#include "math/common.hpp"
 
 class aabb {
 public:
@@ -28,7 +28,7 @@ inline bool aabb::hit_check(const ray& r, double t_min, double t_max) const {
 	return true;
 }
 
-aabb surrounding_box(aabb box0, aabb box1) {
+inline aabb surrounding_box(aabb box0, aabb box1) {
 	vec3 new_min(
 		fmin(box0.min().x(), box1.min().x()),
 		fmin(box0.min().y(), box1.min().y()),

@@ -1,18 +1,18 @@
 #include <iostream>
 #include <assert.h>
 
-#include "math/common.h"
-#include "color.h"
-#include "geometry/visible_collection.h"
-#include "geometry/sphere.h"
-#include "camera.h"
-#include "math/random_number.h"
-#include "materials/material.h"
-#include "geometry/moving_sphere.h"
-#include "bvh.h"
-#include "geometry/aarect.h"
-#include "geometry/box.h"
-#include "geometry/constant_medium.h"
+#include "math/common.hpp"
+#include "color.hpp"
+#include "geometry/visible_collection.hpp"
+#include "geometry/sphere.hpp"
+#include "camera.hpp"
+#include "math/random_number.hpp"
+#include "materials/material.hpp"
+#include "geometry/moving_sphere.hpp"
+#include "bvh.hpp"
+#include "geometry/aarect.hpp"
+#include "geometry/box.hpp"
+#include "geometry/constant_medium.hpp"
 
 visible_collection random_scene() {
 	visible_collection world;

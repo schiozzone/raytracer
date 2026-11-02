@@ -3,7 +3,7 @@
 #include <cmath>
 #include <iostream>
 
-#include "math/random_number.h"
+#include "math/random_number.hpp"
 
 class vec3 {
 public:
@@ -106,7 +106,7 @@ public:
 	}
 };
 
-vec3 random_in_unit_sphere() {
+inline vec3 random_in_unit_sphere() {
 	for (;;) {
 		auto p = vec3::random(-1, 1);
 		if (p.length_squared() >= 1) continue;
@@ -114,22 +114,22 @@ vec3 random_in_unit_sphere() {
 	}
 }
 
-vec3 random_unit_vector() {
+inline vec3 random_unit_vector() {
 	return unit_vector(random_in_unit_sphere());
 }
 
-vec3 random_in_hemisphere(const vec3& normal) {
+inline vec3 random_in_hemisphere(const vec3& normal) {
 	vec3 in_unit_Sphere = random_in_unit_sphere();
 	if (dot(in_unit_Sphere, normal) > 0.0)
 		return in_unit_Sphere;
 	return -in_unit_Sphere;
 }
 
-vec3 reflect(const vec3& v, const vec3& normal) {
+inline vec3 reflect(const vec3& v, const vec3& normal) {
 	return v - 2 * dot(v, normal) * normal;
 }
 
-vec3 refract(const vec3& uv, const vec3& n, double eta_quotient) {
+inline vec3 refract(const vec3& uv, const vec3& n, double eta_quotient) {
 	// uv = unit vector
 	auto cos_theta = fmin(dot(-uv, n), 1.0);
 	vec3 r_perpendicular = eta_quotient * (uv + cos_theta * n);
@@ -137,7 +137,7 @@ vec3 refract(const vec3& uv, const vec3& n, double eta_quotient) {
 	return r_perpendicular + r_parallel;
 }
 
-vec3 random_in_unit_disk() {
+inline vec3 random_in_unit_disk() {
 	for (;;) {
 		auto p = vec3(random_double(-1, 1), random_double(-1, 1), 0);
 		if (p.length_squared() >= 1) continue;

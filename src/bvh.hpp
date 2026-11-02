@@ -2,9 +2,9 @@
 
 #include <algorithm>
 
-#include "math/common.h"
-#include "geometry/visible.h"
-#include "geometry/visible_collection.h"
+#include "math/common.hpp"
+#include "geometry/visible.hpp"
+#include "geometry/visible_collection.hpp"
 
 class bvh_node : public visible {
 public:
@@ -37,15 +37,15 @@ inline bool box_compare(const std::shared_ptr<visible> a, const std::shared_ptr<
 	return box_a.value().min()[axis] < box_b.value().min()[axis];
 }
 
-bool box_x_compare(const std::shared_ptr<visible> a, const std::shared_ptr<visible> b) {
+inline bool box_x_compare(const std::shared_ptr<visible> a, const std::shared_ptr<visible> b) {
 	return box_compare(a, b, 0);
 }
 
-bool box_y_compare(const std::shared_ptr<visible> a, const std::shared_ptr<visible> b) {
+inline bool box_y_compare(const std::shared_ptr<visible> a, const std::shared_ptr<visible> b) {
 	return box_compare(a, b, 1);
 }
 
-bool box_z_compare(const std::shared_ptr<visible> a, const std::shared_ptr<visible> b) {
+inline bool box_z_compare(const std::shared_ptr<visible> a, const std::shared_ptr<visible> b) {
 	return box_compare(a, b, 2);
 }
 

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "math/common.h"
+#include "math/common.hpp"
 
-#include "geometry/aarect.h"
-#include "geometry/visible_collection.h"
+#include "geometry/aarect.hpp"
+#include "geometry/visible_collection.hpp"
 
 class box : public visible {
 public:

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "math/common.h"
-#include "geometry/visible.h"
+#include "math/common.hpp"
+#include "geometry/visible.hpp"
 
 class moving_sphere : public visible {
 public:

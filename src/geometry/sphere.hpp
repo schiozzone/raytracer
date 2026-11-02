@@ -2,7 +2,7 @@
 
 #include <cassert>
 
-#include "geometry/visible.h"
+#include "geometry/visible.hpp"
 
 class sphere : public visible {
 public:

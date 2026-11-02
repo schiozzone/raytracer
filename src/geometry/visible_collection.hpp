@@ -3,8 +3,8 @@
 #include <memory>
 #include <vector>
 
-#include "geometry/visible.h"
-#include "aabb.h"
+#include "geometry/visible.hpp"
+#include "aabb.hpp"
 
 class visible_collection : public visible {
 public:
