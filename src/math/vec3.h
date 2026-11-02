@@ -3,7 +3,7 @@
 #include <cmath>
 #include <iostream>
 
-#include "random_number.h"
+#include "math/random_number.h"
 
 class vec3 {
 public:

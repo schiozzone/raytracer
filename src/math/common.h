@@ -4,8 +4,8 @@
 #include <limits>
 #include <memory>
 
-#include "ray.h"
-#include "vec3.h"
+#include "math/ray.h"
+#include "math/vec3.h"
 
 const double infinity = std::numeric_limits<double>::infinity();
 const double pi = 3.1415926535897932385;

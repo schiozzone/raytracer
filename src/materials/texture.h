@@ -2,9 +2,9 @@
 
 #include <cstring>
 
-#include "common.h"
-#include "perlin.h"
-#include "stb_image.h"
+#include "math/common.h"
+#include "materials/perlin.h"
+#include "materials/stb_image.h"
 
 class texture {
 public:

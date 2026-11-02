@@ -1,13 +1,27 @@
 set_project("raytracer")
 
+includes("xmake/options.lua", "xmake/rules.lua", "xmake/tasks.lua")
+
 set_languages("c++23")
 add_rules("mode.debug", "mode.release")
-set_toolchains("clang-cl")
+add_rules("template")
+
+if has_config("llvm") then
+	set_toolchains(is_plat("windows") and "clang-cl" or "clang")
+end
 
 target("raytracer")
-	set_kind("binary")
-	add_files("src/*.cpp")
-	add_includedirs("include/")
-	add_cxxflags("-W4", "-Wextra", "-Wpedantic", "-Wshadow", "-Wconversion", "-Wsign-conversion",
-				"-Wold-style-cast", "-Wnon-virtual-dtor", "-Woverloaded-virtual", "-Wcast-align",
-				"-Wnull-dereference", "-Wdouble-promotion", "-Wformat=2", "-Wimplicit-fallthrough")
+	set_kind("static")
+	add_files("src/**.cpp")
+	add_includedirs("include", {public = true})
+	add_includedirs("src")
+	-- add_headerfiles("include/(raytracer/*.h)")
+
+-- separating domain logic (src/) from the presentation
+if has_config("entry") then
+	target("raytracer-cli")
+		set_kind("binary")
+		add_files("entry/*.cpp")
+		add_includedirs("src")
+		add_deps("raytracer")
+end

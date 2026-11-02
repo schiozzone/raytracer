@@ -1,10 +1,10 @@
 #pragma once
 
-#include "common.h"
+#include "math/common.h"
 
-#include "visible.h"
-#include "material.h"
-#include "texture.h"
+#include "geometry/visible.h"
+#include "materials/material.h"
+#include "materials/texture.h"
 
 class constant_medium : public visible {
 public:

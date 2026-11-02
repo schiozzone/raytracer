@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-#include "vec3.h"
-#include "common.h"
+#include "math/vec3.h"
+#include "math/common.h"
 
 void write_color(std::ostream& out, color pixel_color, int samples_per_pixel) {
 	auto r = pixel_color.x();

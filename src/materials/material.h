@@ -2,9 +2,9 @@
 
 #include <optional>
 
-#include "common.h"
-#include "visible.h"
-#include "texture.h"
+#include "math/common.h"
+#include "geometry/visible.h"
+#include "materials/texture.h"
 
 struct hit;
 

@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "visible.h"
+#include "geometry/visible.h"
 #include "aabb.h"
 
 class visible_collection : public visible {

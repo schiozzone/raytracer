@@ -2,7 +2,7 @@
 
 #include <optional>
 
-#include "ray.h"
+#include "math/ray.h"
 #include "aabb.h"
 
 class material;

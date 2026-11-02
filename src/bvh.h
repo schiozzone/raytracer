@@ -2,9 +2,9 @@
 
 #include <algorithm>
 
-#include "common.h"
-#include "visible.h"
-#include "visible_collection.h"
+#include "math/common.h"
+#include "geometry/visible.h"
+#include "geometry/visible_collection.h"
 
 class bvh_node : public visible {
 public:

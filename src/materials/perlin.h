@@ -2,7 +2,7 @@
 
 #include <array>
 
-#include "common.h"
+#include "math/common.h"
 
 class perlin {
 	static constexpr int point_count = 256;
