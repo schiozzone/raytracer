@@ -1,51 +1,48 @@
 #pragma once
 
 #include "math/common.hpp"
+#include "math/ray.hpp"
+#include "math/vec3.hpp"
 
-class camera {
+class Camera {
 public:
-	camera(
-		vec3 lookfrom,
-		vec3 lookat,
-		vec3 vup,
-		double vfov,
-		double aspect_ratio,
-		double aperture,
-		double focus_dist,
-		double time0 = 0,
-		double time1 = 0
-	) {
-		auto theta = degrees_to_radians(vfov);
+	Camera(
+	    Vec3 lookfrom,
+	    Vec3 lookat,
+	    Vec3 vup,
+	    double vfov,
+	    double aspect_ratio,
+	    double aperture,
+	    double focus_dist,
+	    double time0 = 0,
+	    double time1 = 0
+	) : origin_(lookfrom), lens_radius_(aperture / 2), t0_(time0), t1_(time1) {
+		auto theta = degreesToRadians(vfov);
 		auto h = tan(theta / 2);
 		auto viewport_height = 2.0 * h;
 		auto viewport_width = aspect_ratio * viewport_height;
 
-		w = unit_vector(lookfrom - lookat);
-		u = unit_vector(cross(vup, w));
-		v = cross(w, u);
+		w_ = unitVector(lookfrom - lookat);
+		u_ = unitVector(cross(vup, w_));
+		v_ = cross(w_, u_);
 
-		origin = lookfrom;
-		horizontal = focus_dist * viewport_width * u;
-		vertical = focus_dist * viewport_height * v;
-		lower_left_corner = origin - horizontal / 2 - vertical / 2 - focus_dist * w;
-
-		lens_radius = aperture / 2;
-		t0 = time0;
-		t1 = time1;
+		horizontal_ = focus_dist * viewport_width * u_;
+		vertical_ = focus_dist * viewport_height * v_;
+		lower_left_corner_ = origin_ - horizontal_ / 2 - vertical_ / 2 - focus_dist * w_;
 	}
 
-	ray get_ray(double s, double t) const {
-		vec3 rd = lens_radius * random_in_unit_disk();
-		vec3 offset = u * rd.x() + v * rd.y();
-		return ray(
-			origin + offset,
-			lower_left_corner + s * horizontal + t * vertical - origin - offset,
-			random_double(t0, t1)
+	Ray getRay(double s, double t) const {
+		Vec3 rd = lens_radius_ * randomInUnitDisk();
+		Vec3 offset = u_ * rd.x() + v_ * rd.y();
+		return Ray(
+		    origin_ + offset,
+		    lower_left_corner_ + s * horizontal_ + t * vertical_ - origin_ - offset,
+		    randomDouble(t0_, t1_)
 		);
 	}
 
 private:
-	vec3 origin, horizontal, vertical, lower_left_corner;
-	vec3 u, v, w;
-	double lens_radius, t0, t1;
+	Vec3 origin_, horizontal_, vertical_, lower_left_corner_;
+	Vec3 u_, v_, w_;
+	double lens_radius_, t0_, t1_;
 };

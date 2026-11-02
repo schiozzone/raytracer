@@ -1,56 +1,57 @@
 #pragma once
 
 #include <cassert>
+#include <utility>
 
 #include "geometry/visible.hpp"
 
-class xy_rect : public visible {
+class XyRect : public Visible {
 public:
-	xy_rect() : x0(0), x1(0), y0(0), y1(0), k(0) {}
-	xy_rect(double x0, double x1, double y0, double y1, double z, std::shared_ptr<material> material)
-		: x0(x0), x1(x1), y0(y0), y1(y1), k(z), m(material) {
+	XyRect() : x0_(0), x1_(0), y0_(0), y1_(0), k_(0) {}
+	XyRect(double x0, double x1, double y0, double y1, double z, std::shared_ptr<Material> material)
+	    : m_(std::move(material)), x0_(x0), x1_(x1), y0_(y0), y1_(y1), k_(z) {
 		assert(x0 <= x1);
 		assert(y0 <= y1);
 	};
 
-	std::optional<hit> hit_check(const ray& r, double t_min, double t_max) const override;
-	std::optional<aabb> bounding_box(double time0, double time1) const override;
+	std::optional<Hit> hitCheck(const Ray& r, double t_min, double t_max) const override;
+	std::optional<Aabb> boundingBox(double time0, double time1) const override;
 
 private:
-	std::shared_ptr<material> m;
-	double x0, x1, y0, y1, k;
+	std::shared_ptr<Material> m_;
+	double x0_, x1_, y0_, y1_, k_;
 };
 
-class xz_rect : public visible {
+class XzRect : public Visible {
 public:
-	xz_rect() : x0(0), x1(0), z0(0), z1(0), k(0) {}
-	xz_rect(double x0, double x1, double z0, double z1, double y, std::shared_ptr<material> material)
-		: x0(x0), x1(x1), z0(z0), z1(z1), k(y), m(material) {
+	XzRect() : x0_(0), x1_(0), z0_(0), z1_(0), k_(0) {}
+	XzRect(double x0, double x1, double z0, double z1, double y, std::shared_ptr<Material> material)
+	    : m_(std::move(material)), x0_(x0), x1_(x1), z0_(z0), z1_(z1), k_(y) {
 		assert(x0 <= x1);
 		assert(z0 <= z1);
 	};
 
-	std::optional<hit> hit_check(const ray& r, double t_min, double t_max) const override;
-	std::optional<aabb> bounding_box(double time0, double time1) const override;
+	std::optional<Hit> hitCheck(const Ray& r, double t_min, double t_max) const override;
+	std::optional<Aabb> boundingBox(double time0, double time1) const override;
 
 private:
-	std::shared_ptr<material> m;
-	double x0, x1, z0, z1, k;
+	std::shared_ptr<Material> m_;
+	double x0_, x1_, z0_, z1_, k_;
 };
 
-class yz_rect : public visible {
+class YzRect : public Visible {
 public:
-	yz_rect() : y0(0), y1(0), z0(0), z1(0), k(0) {}
-	yz_rect(double y0, double y1, double z0, double z1, double x, std::shared_ptr<material> material)
-		: y0(y0), y1(y1), z0(z0), z1(z1), k(x), m(material) {
+	YzRect() : y0_(0), y1_(0), z0_(0), z1_(0), k_(0) {}
+	YzRect(double y0, double y1, double z0, double z1, double x, std::shared_ptr<Material> material)
+	    : m_(std::move(material)), y0_(y0), y1_(y1), z0_(z0), z1_(z1), k_(x) {
 		assert(y0 <= y1);
 		assert(z0 <= z1);
 	};
 
-	std::optional<hit> hit_check(const ray& r, double t_min, double t_max) const override;
-	std::optional<aabb> bounding_box(double time0, double time1) const override;
+	std::optional<Hit> hitCheck(const Ray& r, double t_min, double t_max) const override;
+	std::optional<Aabb> boundingBox(double time0, double time1) const override;
 
 private:
-	std::shared_ptr<material> m;
-	double y0, y1, z0, z1, k;
+	std::shared_ptr<Material> m_;
+	double y0_, y1_, z0_, z1_, k_;
 };

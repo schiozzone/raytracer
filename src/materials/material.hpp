@@ -1,89 +1,89 @@
 #pragma once
 
 #include <optional>
+#include <utility>
 
-#include "math/common.hpp"
 #include "geometry/visible.hpp"
 #include "materials/texture.hpp"
 
-struct hit;
-
-struct scatter {
-	color attenuation;
-	ray bounce;
+struct Scatter {
+	Color attenuation;
+	Ray bounce;
 };
 
-class material {
+class Material {
 public:
-	virtual std::optional<scatter> scatter_check(const ray& r, const hit& rec) const = 0;
-	virtual color emitted(double u, double v, const vec3& p) const { return color(0, 0, 0); }
+	virtual std::optional<Scatter> scatterCheck(const Ray& r, const Hit& rec) const = 0;
+	virtual Color emitted(double u, double v, const Vec3& p) const { return {0, 0, 0}; }
 };
 
-class lambertian : public material {
+class Lambertian : public Material {
 public:
-	lambertian(const color& albedo) : a(std::make_shared<solid_color>(albedo)) {}
-	lambertian(std::shared_ptr<texture> albedo) : a(albedo) {}
+	Lambertian(const Color& albedo) : a_(std::make_shared<SolidColor>(albedo)) {}
+	Lambertian(std::shared_ptr<Texture> albedo) : a_(std::move(albedo)) {}
 
-	std::optional<scatter> scatter_check(const ray& r, const hit& rec) const override {
-		//auto scatter_direction = rec.normal + random_in_unit_sphere();
-		auto scatter_direction = rec.normal + random_unit_vector();
-		//auto scatter_direction = random_in_hemisphere(rec.normal);
-		if (scatter_direction.near_zero()) scatter_direction = rec.normal; // Correct degenerate directions
-		scatter s{};
-		s.bounce = ray(rec.point, scatter_direction, r.time());
-		s.attenuation = this->a->value(rec.u, rec.v, rec.point); // Could instead scatter with probabiliy p and have the atenuation be albedo/p
+	std::optional<Scatter> scatterCheck(const Ray& r, const Hit& rec) const override {
+		// auto scatter_direction = rec.normal + random_in_unit_sphere();
+		auto scatter_direction = rec.normal + randomUnitVector();
+		// auto scatter_direction = random_in_hemisphere(rec.normal);
+		if (scatter_direction.nearZero()) scatter_direction = rec.normal; // Correct degenerate directions
+		Scatter s{};
+		s.bounce = Ray(rec.point, scatter_direction, r.time());
+		s.attenuation = this->a_->value(rec.u, rec.v, rec.point); // Could instead scatter with probabiliy p and have the atenuation be albedo/p
 		return s;
 	};
 
 private:
-	std::shared_ptr<texture> a;
+	std::shared_ptr<Texture> a_;
 };
 
-class metal : public material {
+class Metal : public Material {
 public:
-	metal(const color& albedo, double fuzz) : metal(std::make_shared<solid_color>(albedo), fuzz) {}
-	metal(std::shared_ptr<texture> albedo, double fuzz) : a(albedo), f(fuzz < 1 ? fuzz : 1) {}
+	Metal(const Color& albedo, double fuzz) : Metal(std::make_shared<SolidColor>(albedo), fuzz) {}
+	Metal(std::shared_ptr<Texture> albedo, double fuzz) : a_(std::move(albedo)), f_(fuzz < 1 ? fuzz : 1) {}
 
-	std::optional<scatter> scatter_check(const ray& r, const hit& rec) const override {
-		vec3 reflected = reflect(unit_vector(r.direction()), rec.normal);
-		scatter s{};
-		s.bounce = ray(rec.point, reflected + f * random_in_unit_sphere(), r.time());
-		s.attenuation = this->a->value(rec.u, rec.v, rec.point);
+	std::optional<Scatter> scatterCheck(const Ray& r, const Hit& rec) const override {
+		Vec3 reflected = reflect(unitVector(r.direction()), rec.normal);
+		Scatter s{};
+		s.bounce = Ray(rec.point, reflected + f_ * randomInUnitSphere(), r.time());
+		s.attenuation = this->a_->value(rec.u, rec.v, rec.point);
 		if (dot(s.bounce.direction(), rec.normal) > 0) return s;
 		return std::nullopt;
 	};
+
 private:
-	std::shared_ptr<texture> a;
-	double f;
+	std::shared_ptr<Texture> a_;
+	double f_;
 };
 
-class dielectric : public material {
+class Dielectric : public Material {
 public:
-	dielectric(double refractive_index) : i(refractive_index) {}
+	Dielectric(double refractive_index) : i_(refractive_index) {}
 
-	std::optional<scatter> scatter_check(const ray& r, const hit& rec) const override {
-		double refraction_ratio = rec.front_face ? (1.0 / i) : i;
+	std::optional<Scatter> scatterCheck(const Ray& r, const Hit& rec) const override {
+		double refraction_ratio = rec.front_face ? (1.0 / i_) : i_;
 
-		vec3 unit_direction = unit_vector(r.direction());
+		Vec3 unit_direction = unitVector(r.direction());
 		double cos_theta = fmin(dot(-unit_direction, rec.normal), 1.0);
 		double sin_theta = std::sqrt(1.0 - cos_theta * cos_theta);
 
 		bool cannot_refract = refraction_ratio * sin_theta > 1.0;
-		vec3 direction;
-		if (cannot_refract || reflectance(cos_theta, refraction_ratio) > random_double()) {
+		Vec3 direction;
+		if (cannot_refract || reflectance(cos_theta, refraction_ratio) > randomDouble()) {
 			direction = reflect(unit_direction, rec.normal);
 		}
 		else {
 			direction = refract(unit_direction, rec.normal, refraction_ratio);
 		}
 
-		scatter s{};
-		s.bounce = ray(rec.point, direction, r.time());
-		s.attenuation = color(1.0, 1.0, 1.0);
+		Scatter s{};
+		s.bounce = Ray(rec.point, direction, r.time());
+		s.attenuation = Color(1.0, 1.0, 1.0);
 		return s;
 	};
+
 private:
-	double i;
+	double i_;
 
 	static double reflectance(double cosine, double ref_idx) {
 		// Schlick's
@@ -93,35 +93,35 @@ private:
 	}
 };
 
-class diffuse_light : public material {
+class DiffuseLight : public Material {
 public:
-	diffuse_light(const color& emit) : e(std::make_shared<solid_color>(emit)) {}
-	diffuse_light(std::shared_ptr<texture> emit) : e(emit) {}
+	DiffuseLight(const Color& emit) : e_(std::make_shared<SolidColor>(emit)) {}
+	DiffuseLight(std::shared_ptr<Texture> emit) : e_(std::move(emit)) {}
 
-	std::optional<scatter> scatter_check(const ray& r, const hit& rec) const override {
+	std::optional<Scatter> scatterCheck(const Ray& r, const Hit& rec) const override {
 		return std::nullopt;
 	};
 
-	color emitted(double u, double v, const vec3& p) const override {
-		return e->value(u, v, p);
+	Color emitted(double u, double v, const Vec3& p) const override {
+		return e_->value(u, v, p);
 	}
 
 private:
-	std::shared_ptr<texture> e;
+	std::shared_ptr<Texture> e_;
 };
 
-class isotropic : public material {
+class Isotropic : public Material {
 public:
-	isotropic(color c) : a(std::make_shared<solid_color>(c)) {}
-	isotropic(std::shared_ptr<texture> albedo) : a(albedo) {}
+	Isotropic(Color c) : a_(std::make_shared<SolidColor>(c)) {}
+	Isotropic(std::shared_ptr<Texture> albedo) : a_(std::move(albedo)) {}
 
-	std::optional<scatter> scatter_check(const ray& r, const hit& rec) const override {
-		scatter s{};
-		s.bounce = ray(rec.point, random_in_unit_sphere(), r.time());
-		s.attenuation = a->value(rec.u, rec.v, rec.point);
+	std::optional<Scatter> scatterCheck(const Ray& r, const Hit& rec) const override {
+		Scatter s{};
+		s.bounce = Ray(rec.point, randomInUnitSphere(), r.time());
+		s.attenuation = a_->value(rec.u, rec.v, rec.point);
 		return s;
 	};
 
 private:
-	std::shared_ptr<texture> a;
+	std::shared_ptr<Texture> a_;
 };

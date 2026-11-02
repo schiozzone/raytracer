@@ -1,44 +1,47 @@
+#include <utility>
+
 #include "geometry/visible.hpp"
 
 #include "aabb.hpp"
+#include "math/common.hpp"
 
-std::optional<hit> translate::hit_check(const ray& r, double t_min, double t_max) const {
-	ray offset_r{ r.origin() - offset, r.direction(), r.time() };
-	auto rec = p->hit_check(offset_r, t_min, t_max);
+std::optional<Hit> Translate::hitCheck(const Ray& r, double t_min, double t_max) const {
+	Ray offset_r{ r.origin() - offset_, r.direction(), r.time() };
+	auto rec = p_->hitCheck(offset_r, t_min, t_max);
 	if (rec) {
-		rec->point += offset;
-		rec->set_face_normal(offset_r, rec->normal);
+		rec->point += offset_;
+		rec->setFaceNormal(offset_r, rec->normal);
 	}
 	return rec;
 }
 
-std::optional<aabb> translate::bounding_box(double time0, double time1) const {
-	auto output_box = p->bounding_box(time0, time1);
+std::optional<Aabb> Translate::boundingBox(double time0, double time1) const {
+	auto output_box = p_->boundingBox(time0, time1);
 	if (output_box) {
 		output_box.emplace(
-			output_box->min() + offset,
-			output_box->max() + offset
+		    output_box->min() + offset_,
+		    output_box->max() + offset_
 		);
 	}
 	return output_box;
 }
 
-rotate_y::rotate_y(std::shared_ptr<visible> primitive, double angle) : p(primitive) {
-	auto radians = degrees_to_radians(angle);
-	sin_theta = sin(radians);
-	cos_theta = cos(radians);
-	bbox = p->bounding_box(0, 1); // Fixed time interval
+RotateY::RotateY(std::shared_ptr<Visible> primitive, double angle) : p_(std::move(primitive)) {
+	auto radians = degreesToRadians(angle);
+	sin_theta_ = sin(radians);
+	cos_theta_ = cos(radians);
+	bbox_ = p_->boundingBox(0, 1); // Fixed time interval
 
-	vec3 min{ infinity, infinity, infinity };
-	vec3 max{ -infinity, -infinity, -infinity };
-	
-	if (bbox)
-		for (auto x : { bbox->min().x(),bbox->max().x() })
-			for (auto y : { bbox->min().y(),bbox->max().y() })
-				for (auto z : { bbox->min().z(),bbox->max().z() }) {
-					auto newx = cos_theta * x + sin_theta * z;
-					auto newz = -sin_theta * x + cos_theta * z;
-					vec3 temp{ newx, y, newz };
+	Vec3 min{ infinity, infinity, infinity };
+	Vec3 max{ -infinity, -infinity, -infinity };
+
+	if (bbox_)
+		for (auto x : { bbox_->min().x(), bbox_->max().x() })
+			for (auto y : { bbox_->min().y(), bbox_->max().y() })
+				for (auto z : { bbox_->min().z(), bbox_->max().z() }) {
+					auto newx = cos_theta_ * x + sin_theta_ * z;
+					auto newz = -sin_theta_ * x + cos_theta_ * z;
+					Vec3 temp{ newx, y, newz };
 					for (int c = 0; c < 3; c++) {
 						min[c] = fmin(min[c], temp[c]);
 						max[c] = fmax(max[c], temp[c]);
@@ -46,32 +49,32 @@ rotate_y::rotate_y(std::shared_ptr<visible> primitive, double angle) : p(primiti
 				}
 }
 
-std::optional<hit> rotate_y::hit_check(const ray& r, double t_min, double t_max) const {
-	vec3 origin{
-		cos_theta * r.origin()[0] - sin_theta * r.origin()[2],
+std::optional<Hit> RotateY::hitCheck(const Ray& r, double t_min, double t_max) const {
+	Vec3 origin{
+		cos_theta_ * r.origin()[0] - sin_theta_ * r.origin()[2],
 		r.origin()[1],
-		sin_theta * r.origin()[0] + cos_theta * r.origin()[2],
+		sin_theta_ * r.origin()[0] + cos_theta_ * r.origin()[2],
 	};
-	vec3 direction{
-		cos_theta * r.direction()[0] - sin_theta * r.direction()[2],
+	Vec3 direction{
+		cos_theta_ * r.direction()[0] - sin_theta_ * r.direction()[2],
 		r.direction()[1],
-		sin_theta * r.direction()[0] + cos_theta * r.direction()[2],
+		sin_theta_ * r.direction()[0] + cos_theta_ * r.direction()[2],
 	};
-	ray rotated_r{ origin, direction, r.time() };
+	Ray rotated_r{ origin, direction, r.time() };
 
-	auto rec = p->hit_check(rotated_r, t_min, t_max);
+	auto rec = p_->hitCheck(rotated_r, t_min, t_max);
 	if (rec) {
-		rec->point = vec3{
-			cos_theta * rec->point[0] + sin_theta * rec->point[2],
+		rec->point = Vec3{
+			cos_theta_ * rec->point[0] + sin_theta_ * rec->point[2],
 			rec->point[1],
-			-sin_theta * rec->point[0] + cos_theta * rec->point[2],
+			-sin_theta_ * rec->point[0] + cos_theta_ * rec->point[2],
 		};
-		auto normal = vec3{
-			cos_theta * rec->normal[0] + sin_theta * rec->normal[2],
+		auto normal = Vec3{
+			cos_theta_ * rec->normal[0] + sin_theta_ * rec->normal[2],
 			rec->normal[1],
-			-sin_theta * rec->normal[0] + cos_theta * rec->normal[2],
+			-sin_theta_ * rec->normal[0] + cos_theta_ * rec->normal[2],
 		};
-		rec->set_face_normal(rotated_r, normal);
+		rec->setFaceNormal(rotated_r, normal);
 	}
 	return rec;
 }

@@ -2,21 +2,21 @@
 
 #include "math/vec3.hpp"
 
-class ray {
+class Ray {
 public:
-	ray() {}
-	ray(const vec3& origin, const vec3& direction, double time = 0.0)
-		: A(origin), b(direction), tm(time) {}
+	Ray() = default;
+	Ray(const Vec3& origin, const Vec3& direction, double time = 0.0)
+	    : a_(origin), b_(direction), tm_(time) {}
 
-	vec3 origin() const { return A; }
-	vec3 direction() const { return b; }
-	double time() const { return tm; }
+	Vec3 origin() const { return a_; }
+	Vec3 direction() const { return b_; }
+	double time() const { return tm_; }
 
-	vec3 at(double t) const {
-		return A + t * b;
+	Vec3 at(double t) const {
+		return a_ + t * b_;
 	}
 
 private:
-	vec3 A, b;
-	double tm;
+	Vec3 a_, b_;
+	double tm_;
 };

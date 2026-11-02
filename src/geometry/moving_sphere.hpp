@@ -1,20 +1,22 @@
 #pragma once
 
+#include <utility>
+
 #include "geometry/visible.hpp"
 
-class moving_sphere : public visible {
+class MovingSphere : public Visible {
 public:
-	moving_sphere() : t0(0), t1(0), r(0) {}
-	moving_sphere(vec3 center0, vec3 center1, double time0, double time1, double radius, std::shared_ptr<material> material)
-		: c0(center0), c1(center1), t0(time0), t1(time1), r(radius), m(material) {}
+	MovingSphere() : t0_(0), t1_(0), r_(0) {}
+	MovingSphere(Vec3 center0, Vec3 center1, double time0, double time1, double radius, std::shared_ptr<Material> material)
+	    : c0_(center0), c1_(center1), t0_(time0), t1_(time1), r_(radius), m_(std::move(material)) {}
 
-	std::optional<hit> hit_check(const ray& r, double t_min, double t_max) const override;
-	std::optional<aabb> bounding_box(double time0, double time1) const override;
+	std::optional<Hit> hitCheck(const Ray& r, double t_min, double t_max) const override;
+	std::optional<Aabb> boundingBox(double time0, double time1) const override;
 
-	vec3 center(double time) const; 
+	Vec3 center(double time) const;
 
 private:
-	vec3 c0, c1;
-	double t0, t1, r;
-	std::shared_ptr<material> m;
+	Vec3 c0_, c1_;
+	double t0_, t1_, r_;
+	std::shared_ptr<Material> m_;
 };

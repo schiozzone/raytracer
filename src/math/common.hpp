@@ -1,17 +1,15 @@
 #pragma once
 
+#include "math/random_number.hpp"
 #include <cmath>
 #include <limits>
-#include <memory>
 
-#include "math/ray.hpp"
-#include "math/vec3.hpp"
 
 const double infinity = std::numeric_limits<double>::infinity();
 const double pi = 3.1415926535897932385;
 const double almost_one = std::nextafter(1.0, 0.0);
 
-inline double degrees_to_radians(double degrees) {
+inline double degreesToRadians(double degrees) {
 	return degrees * pi / 180.0;
 }
 
@@ -21,6 +19,6 @@ inline double clamp(double x, double min, double max) {
 	return x;
 }
 
-inline int random_int(int min, int max) {
-	return static_cast<int>(random_double(min, max + 1));
+inline int randomInt(int min, int max) {
+	return static_cast<int>(randomDouble(min, max + 1));
 }

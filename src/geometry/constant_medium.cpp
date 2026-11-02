@@ -1,11 +1,9 @@
 #include "geometry/constant_medium.hpp"
 
-#include "aabb.hpp"
-
-std::optional<hit> constant_medium::hit_check(const ray& r, double t_min, double t_max) const {
-	auto rec1 = convex->hit_check(r, -infinity, infinity);
+std::optional<Hit> ConstantMedium::hitCheck(const Ray& r, double t_min, double t_max) const {
+	auto rec1 = convex_->hitCheck(r, -infinity, infinity);
 	if (!rec1) return std::nullopt;
-	auto rec2 = convex->hit_check(r, rec1->t + 0.0001, infinity);
+	auto rec2 = convex_->hitCheck(r, rec1->t + 0.0001, infinity);
 	if (!rec2) return std::nullopt;
 
 	if (rec1->t < t_min) rec1->t = t_min;
@@ -15,14 +13,14 @@ std::optional<hit> constant_medium::hit_check(const ray& r, double t_min, double
 
 	const auto ray_length = r.direction().length();
 	const auto distance_inside_boundary = (rec2->t - rec1->t) * ray_length;
-	const auto hit_distance = neg_inv_density * log(random_double());
+	const auto hit_distance = neg_inv_density_ * log(randomDouble());
 	if (hit_distance > distance_inside_boundary) return std::nullopt;
 
-	hit rec;
+	Hit rec;
 	rec.t = rec1->t + hit_distance / ray_length;
 	rec.point = r.at(rec.t);
-	rec.normal = vec3{ 1,0,0 };// random_in_unit_sphere();
-	rec.front_face = true; // Arbitrary
-	rec.mat_ptr = phase_function;
+	rec.normal = Vec3{ 1, 0, 0 }; // random_in_unit_sphere();
+	rec.front_face = true;        // Arbitrary
+	rec.mat_ptr = phase_function_;
 	return rec;
 }

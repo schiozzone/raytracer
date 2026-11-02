@@ -5,18 +5,18 @@
 
 #include "geometry/visible.hpp"
 
-class visible_collection : public visible {
+class VisibleCollection : public Visible {
 public:
-	visible_collection() {};
-	visible_collection(std::shared_ptr<visible> object) { add(object); }
+	VisibleCollection() = default;
+	VisibleCollection(const std::shared_ptr<Visible>& object) { add(object); }
 
-	void clear() { objects.clear(); }
-	void add(std::shared_ptr<visible> object) { objects.push_back(object); }
+	void clear() { objects_.clear(); }
+	void add(const std::shared_ptr<Visible>& object) { objects_.push_back(object); }
 
-	std::optional<hit> hit_check(const ray& r, double t_min, double t_max) const override;
-	std::optional<aabb> bounding_box(double time0, double time1) const override;
+	std::optional<Hit> hitCheck(const Ray& r, double t_min, double t_max) const override;
+	std::optional<Aabb> boundingBox(double time0, double time1) const override;
 
 private:
-	friend class bvh_node;
-	std::vector<std::shared_ptr<visible>> objects;
+	friend class BvhNode;
+	std::vector<std::shared_ptr<Visible>> objects_;
 };

@@ -1,19 +1,21 @@
 #pragma once
 
 #include <cassert>
+#include <utility>
 
 #include "geometry/visible.hpp"
+#include "math/common.hpp"
 
-class sphere : public visible {
+class Sphere : public Visible {
 public:
-	sphere() : r(0) {};
-	sphere(vec3 center, double radius, std::shared_ptr<material> material)
-		: c(center), r(radius), m(material) {};
+	Sphere() : r_(0) {};
+	Sphere(Vec3 center, double radius, std::shared_ptr<Material> material)
+	    : c_(center), r_(radius), m_(std::move(material)) {};
 
-	std::optional<hit> hit_check(const ray& r, double t_min, double t_max) const override;
-	std::optional<aabb> bounding_box(double time0, double time1) const override;
+	std::optional<Hit> hitCheck(const Ray& r, double t_min, double t_max) const override;
+	std::optional<Aabb> boundingBox(double time0, double time1) const override;
 
-	static std::pair<double, double> get_sphere_uv(const vec3& p) {
+	static std::pair<double, double> getSphereUv(const Vec3& p) {
 		assert(std::fabs(p.length_squared() - 1.0) < 1e-8 && "p is not a unit vector");
 		auto theta = acos(-p.y());
 		auto phi = atan2(-p.z(), p.x()) + pi;
@@ -24,7 +26,7 @@ public:
 	}
 
 private:
-	vec3 c;
-	double r;
-	std::shared_ptr<material> m;
+	Vec3 c_;
+	double r_;
+	std::shared_ptr<Material> m_;
 };
