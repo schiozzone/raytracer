@@ -15,13 +15,12 @@ target("raytracer")
 	add_files("src/**.cpp")
 	add_includedirs("include", {public = true})
 	add_includedirs("src")
-	-- add_headerfiles("include/(raytracer/*.h)")
+	add_headerfiles("include/(raytracer/*.hpp)")
 
 -- separating domain logic (src/) from the presentation
 if has_config("entry") then
 	target("raytracer-cli")
 		set_kind("binary")
 		add_files("entry/*.cpp")
-		add_includedirs("src")
 		add_deps("raytracer")
 end
