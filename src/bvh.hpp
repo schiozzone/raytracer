@@ -15,7 +15,7 @@ public:
 	bvh_node(const std::vector<std::shared_ptr<visible>>& objects, size_t start, size_t end, double time0, double time1);
 
 	std::optional<hit> hit_check(const ray& r, double t_min, double t_max) const override;
-	std::optional<aabb> bounding_box(double time0, double time1) const override { return box; }
+	std::optional<aabb> bounding_box(double /*time0*/, double /*time1*/) const override { return box; }
 
 private:
 	std::shared_ptr<visible> left;

@@ -271,7 +271,7 @@ void t_func(
 }
 // [/Hacky multithreading support]
 
-int main(int argc, char** argv) {
+int main() {
 	assert((int)(256 * clamp(1, 0.0, almost_one)) == 255);
 
 	// Render target

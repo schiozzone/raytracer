@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstring>
+#include <cassert>
 
 #include "math/common.hpp"
 #include "materials/perlin.hpp"
