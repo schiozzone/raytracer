@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cassert>
+
 #include "visible.h"
 
 class sphere : public visible {
@@ -12,7 +14,7 @@ public:
 	std::optional<aabb> bounding_box(double time0, double time1) const override;
 
 	static std::pair<double, double> get_sphere_uv(const vec3& p) {
-		assert(std::fabs(p.length_squared() - 1.0) < std::numeric_limits<T>::min());
+		assert(std::fabs(p.length_squared() - 1.0) < 1e-8 && "p is not a unit vector");
 		auto theta = acos(-p.y());
 		auto phi = atan2(-p.z(), p.x()) + pi;
 		return {

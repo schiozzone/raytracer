@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstring>
+
 #include "common.h"
 #include "perlin.h"
 #include "stb_image.h"
@@ -71,7 +73,7 @@ public:
 		else {
 			const size_t size = width * height * bytes_per_pixel;
 			data.resize(size);
-			memcpy_s(data.data(), data.size(), raw_data, size);
+			std::memcpy(data.data(), raw_data, size);
 			stbi_image_free(raw_data);
 		}
 	}

@@ -41,7 +41,7 @@ private:
 
 class metal : public material {
 public:
-	metal(const color& albedo, double fuzz) : metal(std::make_shared<solid_color>(albedo), f) {}
+	metal(const color& albedo, double fuzz) : metal(std::make_shared<solid_color>(albedo), fuzz) {}
 	metal(std::shared_ptr<texture> albedo, double fuzz) : a(albedo), f(fuzz < 1 ? fuzz : 1) {}
 
 	std::optional<scatter> scatter_check(const ray& r, const hit& rec) const override {

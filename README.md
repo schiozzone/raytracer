@@ -18,3 +18,11 @@ Basic implementation of path tracing with a focus on correctness over performanc
 - [ ] ✨[Physically Based Rendering](https://pbr-book.org/)✨!
 
 ![cover2](cover2.png)
+
+## Build
+
+On Windows, you may install the required dependencies using `scoop import scoopfile.json`.
+
+Run `xmake -r` for a full build.
+
+Use `xmake config` to configure the project (i.e. `xmake f -m debug` configures it to compile in debug mode).

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+
 #include "common.h"
 #include "visible.h"
 #include "visible_collection.h"
