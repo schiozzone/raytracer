@@ -97,7 +97,7 @@ public:
 		const auto color_scale = 1.0 / 255.0;
 		const auto bytes_per_scanline = width_ * bytes_per_pixel_;
 		size_t pixel = j * bytes_per_scanline + i * bytes_per_pixel_;
-		assert(bytes_per_pixel >= 3); // Less will break
+		assert(bytes_per_pixel_ >= 3); // Less will break
 		return Color(
 		    color_scale * data_[pixel],
 		    color_scale * data_[pixel + 1],

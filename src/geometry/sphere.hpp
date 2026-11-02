@@ -16,7 +16,7 @@ public:
 	std::optional<Aabb> boundingBox(double time0, double time1) const override;
 
 	static std::pair<double, double> getSphereUv(const Vec3& p) {
-		assert(std::fabs(p.length_squared() - 1.0) < 1e-8 && "p is not a unit vector");
+		assert(std::fabs(p.lengthSquared() - 1.0) < 1e-8 && "p is not a unit vector");
 		auto theta = acos(-p.y());
 		auto phi = atan2(-p.z(), p.x()) + pi;
 		return {
