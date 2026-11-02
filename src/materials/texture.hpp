@@ -2,6 +2,7 @@
 
 #include <cstring>
 #include <cassert>
+#include <memory>
 #include <utility>
 
 #include "math/common.hpp"
