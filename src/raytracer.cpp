@@ -8,10 +8,10 @@ void renderScene(SampleScene scn) {
 	assert((int)(256 * clamp(1, 0.0, almost_one)) == 255);
 
 	// Render target
-	constexpr double aspect_ratio = 1.0;// 16.0 / 9.0;
+	constexpr double aspect_ratio = 1.0; // 16.0 / 9.0;
 	constexpr int img_width = 800;
 	const Image img{ .width = img_width, .height = static_cast<int>(img_width / aspect_ratio) };
-	constexpr int samples_per_pixel = 100;// 10'000;
+	constexpr int samples_per_pixel = 100; // 10'000;
 	constexpr int max_depth = 50;
 
 	// Camera

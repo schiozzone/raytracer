@@ -23,7 +23,7 @@ Color rayColor(const Ray& r, const Visible& world, int depth) {
 	/*Vec3 unit_direction = unitVector(r.direction());
 	auto t = 0.5 * (unit_direction.y() + 1.0);
 	return (1.0 - t) * Color(1.0, 1.0, 1.0) + t * Color(0.5, 0.7, 1.0);*/
-	return {0, 0, 0};
+	return { 0, 0, 0 };
 }
 
 // [Hacky multithreading support]
@@ -79,21 +79,23 @@ void render(Image img, int samples_per_pixel, const Camera& cam, const BvhNode& 
 	framebuffer.resize(img.width * img.height);
 	std::vector<std::thread> threads;
 	int cores = std::thread::hardware_concurrency();
-	std::cerr << "Found " << cores << " cores.\n" << std::flush;
+	std::cerr << "Found " << cores << " cores.\n"
+	          << std::flush;
 	const int num_threads = cores * 2;
 	int lines_per_thread = img.height / num_threads;
 
 	threads.reserve(num_threads);
-    for (int i = 0; i < num_threads - 1; ++i)
+	for (int i = 0; i < num_threads - 1; ++i)
 		threads.emplace_back(tFunc, i * lines_per_thread, (i + 1) * lines_per_thread, framebuffer.data(), img.height, img.width, samples_per_pixel, cam, world, max_depth);
 	threads.emplace_back(tFunc, (num_threads - 1) * lines_per_thread, img.height, framebuffer.data(), img.height, img.width, samples_per_pixel, cam, world, max_depth);
 
 	for (std::thread& t : threads)
 		t.join();
 
-	std::cout << "P3\n" << img.width << ' ' << img.height << "\n255\n";
+	std::cout << "P3\n"
+	          << img.width << ' ' << img.height << "\n255\n";
 	std::cerr << "\nWriting image...\n";
-	for(const auto& pixel : framebuffer)
+	for (const auto& pixel : framebuffer)
 		writeColor(std::cout, pixel, samples_per_pixel);
 	std::cerr << "\nDone.\n";
 #endif

@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "math/ray.hpp"
 #include "math/vec3.hpp"
 class Aabb {

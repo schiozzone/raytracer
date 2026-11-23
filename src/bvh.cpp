@@ -11,14 +11,13 @@ std::optional<Hit> BvhNode::hitCheck(const Ray& r, double t_min, double t_max) c
 	return hit_right ? hit_right : hit_left;
 }
 
-
 BvhNode::BvhNode(const std::vector<std::shared_ptr<Visible>>& src, size_t start, size_t end, double time0, double time1) {
 	auto objects = src;
 
 	int axis = randomInt(0, 2);
 	auto comparator =
 	    (axis == 0) ? boxXCompare : (axis == 1) ? boxYCompare
-	                                              : boxZCompare;
+	                                            : boxZCompare;
 
 	size_t span = end - start;
 

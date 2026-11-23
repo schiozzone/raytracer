@@ -42,7 +42,7 @@ public:
 		auto sines = sin(10 * p.x()) * sin(10 * p.y()) * sin(10 * p.z());
 		if (sines < 0)
 			return o->value(u, v, p);
-	
+
 		return e->value(u, v, p);
 	}
 

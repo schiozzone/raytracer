@@ -61,10 +61,11 @@ VisibleCollection randomScene() {
 VisibleCollection twoSpheres() {
 	VisibleCollection objects;
 	auto checker = std::make_shared<Lambertian>(
-		std::make_shared<CheckerTexture>(
-			Color(0.2, 0.3, 0.1),
-			Color(0.9, 0.9, 0.9)
-	));
+	    std::make_shared<CheckerTexture>(
+	        Color(0.2, 0.3, 0.1),
+	        Color(0.9, 0.9, 0.9)
+	    )
+	);
 	objects.add(std::make_shared<Sphere>(Vec3{ 0, -10, 0 }, 10, checker));
 	objects.add(std::make_shared<Sphere>(Vec3{ 0, 10, 0 }, 10, checker));
 	return objects;
@@ -190,12 +191,11 @@ VisibleCollection finalScene() {
 	objects.add(boundary);
 	objects.add(std::make_shared<ConstantMedium>(boundary, 0.2, Color{ 0.2, 0.4, 0.9 }));
 
-	objects.add(std::make_shared<ConstantMedium>(
-		std::make_shared<Sphere>(Vec3{ 0, 0, 0 }, 5000, nullptr), 0.0001, Color{ 1, 1, 1 }));
+	objects.add(std::make_shared<ConstantMedium>(std::make_shared<Sphere>(Vec3{ 0, 0, 0 }, 5000, nullptr), 0.0001, Color{ 1, 1, 1 }));
 
 	auto emat = std::make_shared<Lambertian>(std::make_shared<ImageTexture>("Blue_Marble_2002.png"));
 	objects.add(std::make_shared<Sphere>(Vec3{ 400, 200, 400 }, 100, emat));
-	
+
 	auto permat = std::make_shared<Lambertian>(std::make_shared<NoiseTexture>(0.1));
 	objects.add(std::make_shared<Sphere>(Vec3{ 220, 280, 300 }, 80, permat));
 
@@ -204,13 +204,7 @@ VisibleCollection finalScene() {
 	int ns = 1000;
 	for (int j = 0; j < ns; j++)
 		boxes2.add(std::make_shared<Sphere>(Vec3::random(0, 165), 10, white));
-	objects.add(std::make_shared<Translate>(
-		std::make_shared<RotateY>(
-			std::make_shared<BvhNode>(boxes2, 0.0, 1.0),
-			15
-		),
-		Vec3{ -100, 270, 395 }
-	));
+	objects.add(std::make_shared<Translate>(std::make_shared<RotateY>(std::make_shared<BvhNode>(boxes2, 0.0, 1.0), 15), Vec3{ -100, 270, 395 }));
 
 	return objects;
 }

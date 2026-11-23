@@ -93,15 +93,15 @@ public:
 		);
 	}
 
-	friend  Vec3 unitVector(Vec3 v) {
+	friend Vec3 unitVector(Vec3 v) {
 		return v / v.length();
 	}
 
-	static  Vec3 random() {
+	static Vec3 random() {
 		return Vec3(randomDouble(), randomDouble(), randomDouble());
 	}
 
-	static  Vec3 random(double min, double max) {
+	static Vec3 random(double min, double max) {
 		return Vec3(randomDouble(min, max), randomDouble(min, max), randomDouble(min, max));
 	}
 };

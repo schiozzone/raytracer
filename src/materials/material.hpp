@@ -14,7 +14,7 @@ struct Scatter {
 class Material {
 public:
 	virtual std::optional<Scatter> scatterCheck(const Ray& r, const Hit& rec) const = 0;
-	virtual Color emitted(double u, double v, const Vec3& p) const { return {0, 0, 0}; }
+	virtual Color emitted(double u, double v, const Vec3& p) const { return { 0, 0, 0 }; }
 };
 
 class Lambertian : public Material {
